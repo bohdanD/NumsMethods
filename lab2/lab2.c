@@ -1,5 +1,5 @@
 /*
- * lab1.c
+ * lab2.c
  * 
  * Copyright 2016 fei34dorosh <fei34dorosh@class>
  * 
@@ -25,9 +25,6 @@
 #include <stdio.h>
 #include <math.h>
 
-
-
-
 void writef()
 {
 	FILE *fp;
@@ -52,10 +49,30 @@ void writef()
 	fclose(fp);
 }
 
+int fact(int k)
+{
+	static int res = 1;
+	if(k==0 || k==1)
+	{
+		return res;
+	}else
+	{
+		res = fact(k-1) * k;
+	}
+	return res;
+}
+
+int cnk(int n, int k)
+{
+	static int res = 0;
+	res = fact(n)/(fact(k)*fact(n-k));
+	return res;
+}
+
 int main(int argc, char **argv)
 {
-	writef();
+	//writef();
+	printf("%i", cnk(2, 5));
 	return 0;
-	
 }
 
