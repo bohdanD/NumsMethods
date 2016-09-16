@@ -54,7 +54,7 @@ int fact(int k)
 	static int res = 1;
 	if(k==0 || k==1)
 	{
-		return res;
+		return 1;
 	}else
 	{
 		res = fact(k-1) * k;
@@ -65,14 +65,16 @@ int fact(int k)
 int cnk(int n, int k)
 {
 	static int res = 0;
-	res = fact(n)/(fact(k)*fact(n-k));
+	int nk = n - k;
+	res = (int)fact(n)/(fact(k)*fact(nk));
 	return res;
 }
 
 int main(int argc, char **argv)
 {
 	//writef();
-	printf("%i", cnk(2, 5));
+	int i = cnk(4, 2);
+	printf("%i", i);
 	return 0;
 }
 
