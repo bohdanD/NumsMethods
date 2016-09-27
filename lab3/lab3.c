@@ -1,5 +1,5 @@
 /*
- * lab1.c
+ * безіменний.c
  * 
  * Copyright 2016 fei34dorosh <fei34dorosh@class>
  * 
@@ -24,21 +24,14 @@
 
 #include <stdio.h>
 #include <math.h>
-<<<<<<< HEAD
-	
-=======
-
-
-
->>>>>>> ac019925819b0d64ff31b707662964bf794b0d67
 
 void writef()
 {
 	FILE *fp;
 	fp = fopen("res.txt", "w+");
 	int iter = 100;
-	double step = 0.06;
-	double x = -3;
+	double step = 0.1;
+	double x = 0;
 	double y;
 	char s1[50];
 	char s2[50];
@@ -56,12 +49,62 @@ void writef()
 	fclose(fp);
 }
 
+void readx(double y[])
+{
+	FILE *fp;
+	char buff[255];
+	char buff2[255];
+	fp = fopen("res.txt", "r");
+	for(int i=0; i<100; i++)
+	{
+		if((i % 2) > 0)
+			fscanf(fp, "%s", buff);
+		else
+			fscanf(fp, "%s", buff2);
+		sscanf(buff, "%lf", &y[i]);	
+		//printf("%lf", y[i]);
+	}
+}
+
+double omega(double x, double arr[])
+{
+	static double res = 1;
+	for(int i= 0; i< 100; i++)
+	{
+		if(x!=arr[i])
+			res = res * (x - arr[i]);
+	}
+	return res;
+}
+
+double newton(double x[], double y[])
+{
+	static double res=0;
+	for(int i=0; i<100; i++)
+	{
+		double t = omega(x[i], x); 
+		printf("\n%lf", t);
+		res+=y[i]/ t;
+	}
+	return res;
+}
+
 
 
 int main(int argc, char **argv)
 {
-	writef();
-	return 0;
 	
+	double x[100];
+	x[0]=0;
+	for(int i=1; i<100; i++)
+		x[i]= x[i-1]+0.1;
+	double y[100];
+	writef();
+	readx(y);
+	printf("%s", "\n");
+	printf("%lf", omega(1, x));
+	printf("%s", "\n");
+	printf("%lf", newton(x, y));
+	return 0;
 }
 
