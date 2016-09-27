@@ -28,7 +28,7 @@
 void writef()
 {
 	FILE *fp;
-	fp = fopen("res.txt", "w+");
+	fp = fopen("f(x)n=20.txt", "w+");
 	int iter = 2000;
 	double step = 0.01;
 	double x = 0;
@@ -49,17 +49,17 @@ void writef()
 	fclose(fp);
 }
 
-void ready(double y[], int n)
+void readx(double y[], int n)
 {
 	FILE *fp;
 	char buff[255];
 	char buff2[255];
-	fp = fopen("res.txt", "r");
+	fp = fopen("f(x)n=5.txt", "r");
 	for(int i=0; i<=n; i++)
 	{
-		if((i % 2) > 0)
+		
 			fscanf(fp, "%s", buff);
-		else
+		
 			fscanf(fp, "%s", buff2);
 		sscanf(buff, "%lf", &y[i]);	
 		//printf("%lf", y[i]);
@@ -67,7 +67,7 @@ void ready(double y[], int n)
 }
 int fact(int k)
 {
-	static int res = 1;
+	int res = 1;
 	if(k==0 || k==1)
 	{
 		return 1;
@@ -82,29 +82,28 @@ int cnk(int n, int k)
 {
 	static int res = 0;
 	int nk = n - k;
-	res = (int)fact(n)/(fact(k)*fact(nk));
+	res = fact(n)/(fact(k)*fact(nk));
 	return res;
 }
 
 double delta(int k)
 {
-	static double result = 0;
+	double result = 0;
 	for(int i=0; i<=k; i++)
 	{
-		result += pow(-1, i) * sin(k-i);
+		result += pow(-1, i) * cnk(k, i) * sin(k-i);
 	}
 	return result;
 }
 
 double factPolynom(double t, int n)
 {
-	static double result = 1;
+	double res = 1;
 	for(int i=0; i<n; i++)
 	{
-		result *= t - i;
+		res *= t-i;
 	}
-	
-	return result;
+	return res;
 	
 }
 
@@ -120,23 +119,49 @@ double fAppr(double t, int n)
 
 double eps(double f, double fappr)
 {
-	static double res =0;
+	double res =0;
 	double t = f - fappr;
 	res = fabs(t);
 	return res;
 }
  
+ void writeAppr(double yarr[], int n)
+ {
+	 FILE *fp;
+	fp = fopen("fAppr(x)n=5.txt", "w+");
+
+	double y;
+	char s1[50];
+	char s2[50];
+	int k = n/100;
+	for(int i=0; i<=n; i++)
+	{
+		y = fAppr(yarr[i], k);
+		sprintf(s1, "%f", yarr[i]);
+		sprintf(s2, "%f", y);
+		fputs(s1, fp);
+		fputs("\t", fp);
+		fputs(s2, fp);
+		fputs("\n", fp);
+	
+	}
+	fclose(fp);
+ }
+ 
 int main(int argc, char **argv)
 {
-	writef();
-	double y[2000];
-	ready(y, 2000);
-	//int i = cnk(4, 2);
-	//printf("%i", i);
-	double appr = fAppr(2, 20);
+	//writef();
+	double y[2001];
+	readx(y, 500);
+	writeAppr(y, 500);
+	double pol  = factPolynom(2.1, 20);
+	double appr = fAppr(2.1, 5);
 	printf("%lf\n", appr);
 	printf("%lf\n", y[200]);
-	printf("%lf", eps(y[200], appr));
+	printf("%lf\n", eps(y[200], appr));
+	
+	printf("%lf\n", delta(10));
+	printf("%lf\n", pol);
 	return 0;
 }
 
