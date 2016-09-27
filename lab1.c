@@ -24,20 +24,7 @@
 
 #include <stdio.h>
 #include <math.h>
-/*
-double * sin_tabulation(double step, double interval)
-{
-	int array_length = (int) interval / step;
-	double* result = (double*)malloc(sizeof(double) * array_length);
-	double arg = 0;
-	for(int i=0; i<array_length; i++)
-	{
-		result[i] = sin(arg);
-		arg += step; 
-	}
-	return result;
-}
-*/	
+	
 
 void writef()
 {
@@ -62,6 +49,8 @@ void writef()
 	}
 	fclose(fp);
 }
+
+
 
 int main(int argc, char **argv)
 {
