@@ -57,9 +57,7 @@ void readx(double y[])
 	fp = fopen("res.txt", "r");
 	for(int i=0; i<100; i++)
 	{
-		if((i % 2) > 0)
 			fscanf(fp, "%s", buff);
-		else
 			fscanf(fp, "%s", buff2);
 		sscanf(buff, "%lf", &y[i]);	
 		//printf("%lf", y[i]);
@@ -68,7 +66,7 @@ void readx(double y[])
 
 double omega(double x, double arr[])
 {
-	static double res = 1;
+	double res = 1;
 	for(int i= 0; i< 100; i++)
 	{
 		if(x!=arr[i])
@@ -79,11 +77,11 @@ double omega(double x, double arr[])
 
 double newton(double x[], double y[])
 {
-	static double res=0;
+	double res=0;
 	for(int i=0; i<100; i++)
 	{
 		double t = omega(x[i], x); 
-		printf("\n%lf", t);
+		//printf("\n%lf", t);
 		res+=y[i]/ t;
 	}
 	return res;
