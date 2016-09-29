@@ -49,19 +49,20 @@ void writef()
 	fclose(fp);
 }
 
-void readx(double y[], int n)
+void read(char file[], double x[], double y[], int n)
 {
 	FILE *fp;
 	char buff[255];
 	char buff2[255];
-	fp = fopen("f(x)n=5.txt", "r");
+	fp = fopen(file, "r");
 	for(int i=0; i<=n; i++)
 	{
 		
 			fscanf(fp, "%s", buff);
 		
 			fscanf(fp, "%s", buff2);
-		sscanf(buff, "%lf", &y[i]);	
+		sscanf(buff, "%lf", &x[i]);	
+		sscanf(buff2, "%lf", &y[i]);	
 		//printf("%lf", y[i]);
 	}
 }
@@ -119,29 +120,31 @@ double fAppr(double t, int n)
 
 double eps(double f, double fappr)
 {
-	double res =0;
-	double t = f - fappr;
-	res = fabs(t);
-	return res;
+	return fabs(f-fappr);
 }
  
- void writeAppr(double yarr[], int n)
+ void writeAppr(char file[], double x[], double yarr[], int n)
  {
 	 FILE *fp;
-	fp = fopen("fAppr(x)n=5.txt", "w+");
+	fp = fopen(file, "w+");
 
-	double y;
+	double y, e;
 	char s1[50];
 	char s2[50];
+	char s3[50];
 	int k = n/100;
 	for(int i=0; i<=n; i++)
 	{
-		y = fAppr(yarr[i], k);
-		sprintf(s1, "%f", yarr[i]);
+		y = fAppr(x[i], k);
+		e = eps(yarr[i], y);
+		sprintf(s1, "%f", x[i]);
 		sprintf(s2, "%f", y);
+		sprintf(s3, "%f", e);
 		fputs(s1, fp);
 		fputs("\t", fp);
 		fputs(s2, fp);
+		fputs("\t", fp);
+		fputs(s3, fp);
 		fputs("\n", fp);
 	
 	}
@@ -151,10 +154,14 @@ double eps(double f, double fappr)
 int main(int argc, char **argv)
 {
 	//writef();
+	char fileF[] = "f(x)n=10.txt";
+	char fileFappr[] = "fAppr(x)n=10.txt";
+	int n = 1000;
+	double x[2001];
 	double y[2001];
-	readx(y, 500);
-	writeAppr(y, 500);
-	double pol  = factPolynom(2.1, 20);
+	read(fileF, x, y, n);
+	writeAppr(fileFappr, x, y, n);
+	/*double pol  = factPolynom(2.1, 20);
 	double appr = fAppr(2.1, 5);
 	printf("%lf\n", appr);
 	printf("%lf\n", y[200]);
@@ -162,6 +169,7 @@ int main(int argc, char **argv)
 	
 	printf("%lf\n", delta(10));
 	printf("%lf\n", pol);
+	* */
 	return 0;
 }
 
