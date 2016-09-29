@@ -25,17 +25,16 @@
 #include <stdio.h>
 #include <math.h>
 
-void writef()
+void writef(char file[], int n)
 {
 	FILE *fp;
-	fp = fopen("res.txt", "w+");
-	int iter = 100;
-	double step = 0.1;
+	fp = fopen(file, "w+");
+	double step =  5.0/(n);
 	double x = 0;
 	double y;
 	char s1[50];
 	char s2[50];
-	for(int i=0; i<iter; i++)
+	for(int i=0; i<=n; i++)
 	{
 		y = sin(x);
 		sprintf(s1, "%f", x);
@@ -49,60 +48,98 @@ void writef()
 	fclose(fp);
 }
 
-void readx(double y[])
+void read(char file[], double x[], double y[], int n)
 {
 	FILE *fp;
 	char buff[255];
 	char buff2[255];
-	fp = fopen("res.txt", "r");
-	for(int i=0; i<100; i++)
+	fp = fopen(file, "r");
+	for(int i=0; i<=n; i++)
 	{
+		
 			fscanf(fp, "%s", buff);
+		
 			fscanf(fp, "%s", buff2);
-		sscanf(buff, "%lf", &y[i]);	
+		sscanf(buff, "%lf", &x[i]);	
+		sscanf(buff2, "%lf", &y[i]);	
 		//printf("%lf", y[i]);
 	}
 }
 
-double omega(double x, double arr[])
+double omega(double x, double arr[], int n)
 {
 	double res = 1;
-	for(int i= 0; i< 100; i++)
+	for(int i= 0; i<n; i++)
 	{
 		if(x!=arr[i])
-			res = res * (x - arr[i]);
+			res *= (x - arr[i]);
 	}
 	return res;
 }
 
-double newton(double x[], double y[])
+double newton(double x[], double y[], int n)
 {
 	double res=0;
-	for(int i=0; i<100; i++)
+	for(int i=0; i<=n; i++)
 	{
-		double t = omega(x[i], x); 
 		//printf("\n%lf", t);
-		res+=y[i]/ t;
+		res+= y[i]/ omega(x[i], x, n); 
 	}
 	return res;
 }
 
+double polynome(double xArg, double x[], double y[], int n)
+{
+	double res = y[0];
+	for(int i=1; i<=n; i++)
+	{
+		res += omega(xArg, x, i-1)*newton(x, y, i);
+	}
+	return res;
+}
 
+double eps(double y, double pol)
+{
+	return fabs(y-pol);
+}
+	
+void writePolynome(char file[], double x[], double yarr[], int n)
+ {
+	 FILE *fp;
+	fp = fopen(file, "w+");
+
+	double y, e;
+	char s1[50];
+	char s2[50];
+	char s3[50];
+	//int k = n/100;
+	for(int i=1; i<=n; i++)
+	{
+		y = polynome(x[i], x, yarr, 5);
+		e = eps(yarr[i], y);
+		sprintf(s1, "%f", x[i]);
+		sprintf(s2, "%f", y);
+		sprintf(s3, "%f", e);
+		fputs(s1, fp);
+		fputs("\t", fp);
+		fputs(s2, fp);
+		fputs("\t", fp);
+		fputs(s3, fp);
+		fputs("\n", fp);
+	
+	}
+	fclose(fp);
+ }
 
 int main(int argc, char **argv)
 {
-	
-	double x[100];
-	x[0]=0;
-	for(int i=1; i<100; i++)
-		x[i]= x[i-1]+0.1;
-	double y[100];
-	writef();
-	readx(y);
-	printf("%s", "\n");
-	printf("%lf", omega(1, x));
-	printf("%s", "\n");
-	printf("%lf", newton(x, y));
+	int n = 100;
+	char file[] = "res.txt";
+	double x[n+1];
+	double y[n+1];
+	writef(file, n);
+	read(file, x, y, n);
+	writePolynome("polynome.txt", x, y, n);
 	return 0;
 }
 
