@@ -66,6 +66,7 @@ void read(char file[], double x[], double y[], int n)
 		//printf("%lf", y[i]);
 	}
 }
+//zrobutu double
 int fact(int k)
 {
 	int res = 1;
