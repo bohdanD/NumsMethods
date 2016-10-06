@@ -1,5 +1,5 @@
 /*
- * lab2.c
+ * lab4.c
  * 
  * Copyright 2016 fei34dorosh <fei34dorosh@class>
  * 
@@ -24,18 +24,21 @@
 
 #include <stdio.h>
 #include <math.h>
+#define  m 8
+#define N m+1
+#define N1 N+1
 
-void writef()
+
+void writef(char file[], int n)
 {
 	FILE *fp;
-	fp = fopen("f(x)n=20.txt", "w+");
-	int iter = 2000;
-	double step = 0.01;
+	fp = fopen(file, "w+");
+	double step =  5.0/(n);
 	double x = 0;
 	double y;
 	char s1[50];
 	char s2[50];
-	for(int i=0; i<=iter; i++)
+	for(int i=0; i<=n; i++)
 	{
 		y = sin(x);
 		sprintf(s1, "%f", x);
@@ -63,104 +66,84 @@ void read(char file[], double x[], double y[], int n)
 			fscanf(fp, "%s", buff2);
 		sscanf(buff, "%lf", &x[i]);	
 		sscanf(buff2, "%lf", &y[i]);	
+		//printf("%lf", y[i]);
 	}
 }
 
-long int fact(int k)
-{
-	long int res = 1;
-	if(k==0 || k==1)
-	{
-		return 1;
-	}else
-	{
-		res = fact(k-1) * k;
-	}
-	return res;
-}
-
-int cnk(int n, int k)
-{
-	static int res = 0;
-	int nk = n - k;
-	res = fact(n)/(fact(k)*fact(nk));
-	return res;
-}
-
-double delta(int k)
-{
-	double result = 0;
-	for(int i=0; i<=k; i++)
-	{
-		result += pow(-1, i) * cnk(k, i) * sin(k-i);
-	}
-	return result;
-}
-
-double factPolynom(double t, int n)
-{
+double pow(double x, int n){
 	double res = 1;
-	for(int i=0; i<n; i++)
-	{
-		res *= t-i;
+	if(n != 0){
+		for(int i = 0; i < n; i++) 
+			res *= x;
 	}
 	return res;
-	
-}
+} 
 
-double fAppr(double t, int n)
+double quad(double x, double a[])
 {
-	double sum = 0;
-	for(int i=0; i<=n; i++)
+	double res = 0;
+	for(int i = 1; i <= m; i++)
 	{
-		sum += delta(i) / fact(i) * factPolynom(t, i);
+		res += a[i]*pow(x, i);
 	}
-	return sum;
+	return res+a[0]; 
 }
 
-double eps(double f, double fappr)
+void Gauss(double b[N][N],double c[N],double xx[N])
 {
-	return fabs(f-fappr);
-}
- 
- void writeAppr(char file[], double x[], double yarr[], int n)
- {
-	 FILE *fp;
-	fp = fopen(file, "w+");
+	int k;
+	double r;
 
-	double y, e;
-	char s1[50];
-	char s2[50];
-	char s3[50];
-	int k = n/100;
-	for(int i=0; i<=n; i++)
-	{
-		y = fAppr(x[i], k);
-		e = eps(yarr[i], y);
-		sprintf(s1, "%f", x[i]);
-		sprintf(s2, "%f", y);
-		sprintf(s3, "%f", e);
-		fputs(s1, fp);
-		fputs("\t", fp);
-		fputs(s2, fp);
-		fputs("\t", fp);
-		fputs(s3, fp);
-		fputs("\n", fp);
-	
+	for(int i = 0; i <= m - 1; i++){
+		k = i;
+		r = fabs(b[i][i]);
+		for(int j = i + 1; j <= m; j++)
+		{
+			if(fabs(b[j][i]) >= r){
+				k = j;
+				r = fabs(b[j][i]);
+			}
+		}
+		if(k != i){
+			r = c[k];
+			c[k] = c[i];
+			c[i] = r;
+			for(int j = i; j <= m; j++){
+				r = b[k][j];
+				b[k][j] = b[i][j];
+				b[i][j] = r;
+			}
+		}
+		r = b[i][i];
+		c[i] = c[i] / r;
+		for(int j = 1; j <= m; j++)
+			b[i][j] = b[i][j] / r;
+		for(k = i + 1; k <= m; k++){
+			r = b[k][i];
+			c[k] = c[k] - r * c[i];
+			b[k][i] = 0;
+			for(int j = i + 1; j <= m; j++)
+				b[k][j] = b[k][j] - r * b[i][j];
+		}
 	}
-	fclose(fp);
- }
- 
+	xx[m] = c[m] / b[m][m];
+	for(int i = m - 1; i >= 1; i--){
+		r = c[i];
+	for(int j = i + 1; j <= m; j++) r = r - b[i][j] * xx[j];
+	xx[i] = r;
+	}
+} 
+
+
 int main(int argc, char **argv)
 {
-	//writef();
-	char fileF[] = "f(x)n=20.txt";
-	char fileFappr[] = "fAppr(x)n=20.txt";
-	int n = 2000;
-	double x[2001];
-	double y[2001];
-	read(fileF, x, y, n);
-	writeAppr(fileFappr, x, y, n);
+	char file[]="f(x).txt";
+	//int n =30;
+	double x[N];
+	double y[N];
+	writef(file, N);
+	read(file, x, y ,N);
+	
 	
 	return 0;
 }
