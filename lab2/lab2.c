@@ -63,12 +63,11 @@ void read(char file[], double x[], double y[], int n)
 			fscanf(fp, "%s", buff2);
 		sscanf(buff, "%lf", &x[i]);	
 		sscanf(buff2, "%lf", &y[i]);	
-		//printf("%lf", y[i]);
 	}
 }
-int fact(int k)
+long int fact(int k)
 {
-	int res = 1;
+	long int res = 1;
 	if(k==0 || k==1)
 	{
 		return 1;
@@ -154,9 +153,9 @@ double eps(double f, double fappr)
 int main(int argc, char **argv)
 {
 	//writef();
-	char fileF[] = "f(x)n=10.txt";
-	char fileFappr[] = "fAppr(x)n=10.txt";
-	int n = 1000;
+	char fileF[] = "f(x)n=20.txt";
+	char fileFappr[] = "fAppr(x)n=20.txt";
+	int n = 2000;
 	double x[2001];
 	double y[2001];
 	read(fileF, x, y, n);
