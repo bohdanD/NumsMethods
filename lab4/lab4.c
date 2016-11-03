@@ -24,127 +24,174 @@
 
 #include <stdio.h>
 #include <math.h>
-#define  m 8
-#define N m+1
-#define N1 N+1
 
+#define M_PI 3.14159265358979323846
+const int m = 1;
 
-void writef(char file[], int n)
+long double f(long double x)
 {
-	FILE *fp;
-	fp = fopen(file, "w+");
-	double step =  5.0/(n);
-	double x = 0;
-	double y;
-	char s1[50];
-	char s2[50];
-	for(int i=0; i<=n; i++)
-	{
-		y = sin(x);
-		sprintf(s1, "%f", x);
-		sprintf(s2, "%f", y);
-		fputs(s1, fp);
-		fputs("\t", fp);
-		fputs(s2, fp);
-		fputs("\n", fp);
-		x += step;
-	}
-	fclose(fp);
+	return x*sinl(x*M_PI/180.0L);
 }
 
-void read(char file[], double x[], double y[], int n)
+void tabul()
 {
-	FILE *fp;
-	char buff[255];
-	char buff2[255];
-	fp = fopen(file, "r");
-	for(int i=0; i<=n; i++)
+	int N = 0, i=0;long double x0=0.0L, xn=0.0L;
+	printf("Введіть кількість вузлів:");
+	scanf("%i",&N);
+	printf("Введіть значення абсциси першого вузла:");
+	scanf("%Lf",&x0);
+	printf("Введіть значення абсциси останнього вузла:");
+	scanf("%Lf",&xn);
+	long double x[N+1],y[N+1];
+	long double h = (xn-x0)/(N-1);
+	//h*=5;
+	//табулювання функції
+	for (i = 1;i <= N; i++)
 	{
-		
-			fscanf(fp, "%s", buff);
-		
-			fscanf(fp, "%s", buff2);
-		sscanf(buff, "%lf", &x[i]);	
-		sscanf(buff2, "%lf", &y[i]);	
-		//printf("%lf", y[i]);
+		x[i] = x0+(i-1)*h;
+		y[i] = f(x[i]);
 	}
+	//запис протабульованих даних у файл inputL.txt
+	FILE *finput = fopen("input.txt","w");
+	for(i=1;i<=N;i++)
+	{
+		fprintf(finput,"%i)\t%10.22Le\t%10.22Le\n",i,x[i],y[i]);
+	}
+	printf("Дані записано в input.txt");
+	fclose(finput);
+	return;
 }
 
-double pow(double x, int n){
-	double res = 1;
-	if(n != 0){
-		for(int i = 0; i < n; i++) 
-			res *= x;
-	}
-	return res;
-} 
-
-double quad(double x, double a[])
+long double power(long double x, int a)
 {
-	double res = 0;
-	for(int i = 1; i <= m; i++)
+	long double result = 1;int i=0;
+	for (i=0;i<a;i++)
 	{
-		res += a[i]*pow(x, i);
+		result*=x;
 	}
-	return res+a[0]; 
+	return result;
 }
 
-void Gauss(double b[N][N],double c[N],double xx[N])
+long double dysp(long double *phi, long double *y, int n)
 {
-	int k;
-	double r;
+	long double sum = 0;
+	int i = 0;
+	for (i=0;i<=n;i++)
+	{
+		sum += power(phi[i]-y[i],2);
+	}
+	sum /= n+1;
+	return sqrtl(sum);
+}
 
-	for(int i = 0; i <= m - 1; i++){
-		k = i;
-		r = fabs(b[i][i]);
-		for(int j = i + 1; j <= m; j++)
-		{
-			if(fabs(b[j][i]) >= r){
-				k = j;
-				r = fabs(b[j][i]);
+void gauss(long double a[][m], long double *b, long double *x, int m){
+	int k, max, i, j;
+	long double prom, t, mmax;
+	for(k=0;k<m;k++){
+		max=k;
+		mmax=fabsl(a[k][k]);
+		for(i=k+1;i<m;i++)
+			if(fabsl(a[i][k])>mmax){
+				max=i;
+				mmax=fabsl(a[i][k]);
 			}
-		}
-		if(k != i){
-			r = c[k];
-			c[k] = c[i];
-			c[i] = r;
-			for(int j = i; j <= m; j++){
-				r = b[k][j];
-				b[k][j] = b[i][j];
-				b[i][j] = r;
+			
+		if(max!=k){
+			for(i=0;i<m;i++){
+				prom=a[k][i];
+				a[k][i]=a[max][i];
+				a[max][i]=prom;
 			}
+			prom=b[k];
+			b[k]=b[max];
+			b[max]=prom;
 		}
-		r = b[i][i];
-		c[i] = c[i] / r;
-		for(int j = 1; j <= m; j++)
-			b[i][j] = b[i][j] / r;
-		for(k = i + 1; k <= m; k++){
-			r = b[k][i];
-			c[k] = c[k] - r * c[i];
-			b[k][i] = 0;
-			for(int j = i + 1; j <= m; j++)
-				b[k][j] = b[k][j] - r * b[i][j];
-		}
+		
+		for(i=k+1;i<m;i++){
+			t=-a[i][k]/a[k][k];
+			for(j=k+1;j<m;j++) a[i][j]+=t*a[k][j];
+			b[i]+=t*b[k];
+		}	
 	}
-	xx[m] = c[m] / b[m][m];
-	for(int i = m - 1; i >= 1; i--){
-		r = c[i];
-	for(int j = i + 1; j <= m; j++) r = r - b[i][j] * xx[j];
-	xx[i] = r;
+	
+	x[m-1]=b[m-1]/a[m-1][m-1];
+	for(k=m-2;k>=0;k--){
+		x[k]=b[k];
+		for(i=k+1;i<m;i++)x[k]-=x[i]*a[k][i];
+		x[k]/=a[k][k];
 	}
-} 
-
+}
 
 int main(int argc, char **argv)
 {
-	char file[]="f(x).txt";
-	//int n =30;
-	double x[N];
-	double y[N];
-	writef(file, N);
-	read(file, x, y ,N);
+	tabul();
+	int i=0,j=0,k=0,n=0,N=0;//,max=0;//
+	//long double mmax = 0.0L,prom = 0.0L,t = 0.0L;
+	FILE * fdata = fopen("input.txt","r");
+	FILE * foutput = fopen("output.txt","w");
+	FILE * fdysp = fopen("dysp1.txt","a");
+	char one_char;
+	//визначення кількості вузлів
+	while((one_char = fgetc(fdata)) != EOF)
+    if (one_char == '\n') ++N;
+    n=N-1;
+	long double x[N],y[N],phi[N],c[N];
+	//зчитування вхідних даних
+	rewind(fdata);
+	for(i=0;i<N;i++)
+	{
+		fscanf(fdata,"%i\t%*c\t%Le\t%Le",&j,&x[i],&y[i]);
+		//printf("%i)\t%Le\t%Le\n",j,x[i],y[i]);
+	}
 	
+	//int m=nn;
+	//printf("Введіть значення m:");
+	//scanf("%i",&m);
 	
+	long double a[m][m],b[m],sum=0;
+	for(i=0;i<m;i++)
+	{
+		for(j=0;j<m;j++)
+		{
+			sum=0;
+			for (k=0;k<N;k++)
+			{
+				sum+=power(x[k],i+j);
+			}
+			a[i][j]=sum;
+			//printf("%Lf\n",a[i][j]);
+		}
+		sum=0;
+		for (k=0;k<N;k++)
+		{
+			sum+=power(x[k],i)*y[k];
+		}
+		b[i]=sum;
+		//printf("%Lf\n",b[i]);
+	}
+	//Обчислення коефіцієнтів за методом Гауса
+	gauss(a,b,c,m);
+	//Інтерполяція зі знайденими коефіцієнтами
+	for (i = 0; i < N; i++)
+	{
+		sum=0;
+		for (j=0;j<m;j++)
+		{
+			sum+=c[j]*power(x[i],j);
+		}
+		phi[i]=sum;
+	}
+	for (i=0;i<N;i++)
+	{
+		fprintf(foutput,"%Le\t%Le\t%Le\t%Le\n",x[i],y[i],phi[i],fabsl(phi[i]-y[i]));
+	}
+	//Обчислення дисперсії
+	printf("Дисперсія = %Le\n",dysp(phi,y,n));
+	fprintf(fdysp,"%i\t%Le\n",m,dysp(phi,y,n));
+	printf("Дані записано в output.txt, dysp.txt");
+	fclose(fdata);
+	fclose(foutput);
+	fclose(fdysp);
 	return 0;
 }
 
