@@ -58,30 +58,41 @@ return 1/logl(2)*logl((fn(x, 4.0L*h)-fn(x, 2.0L*h))/(fn(x, 2.0L*h)-fn(x, h)));
 }
 int main(int argc, char **argv)
 {
-	long double x = 0.4;
-	printf("sin(x) = %Lf\n", f(x));
-	printf("f`(x)=%Lf\n", fp(x));
-	long double better=1;
-	long double h;
-	for(int i=-20; i<=3; i++)
+	FILE * fdata = fopen("output.txt","w");
+	FILE * freport = fopen("report.txt","w");
+	long double x0=2.25,yp0=0.0, h=1e-4, h0,h1,E0,E1,E2,E3;
+	
+	while (h>=1e-7)
 	{
-		long double temp = eps1(x, pow(10, i));
-		if(temp<better)
-		{
-			h = pow(10,i);
-			better=temp;
-		}
-		//printf("%Le\n", temp);
+		fprintf(fdata,"%Le\t%Le\n",h,eps1(x0,h));
+		h-=1e-7;
 	}
-	printf("better for y0 =%Le\n", better);
-	printf("better for y0 h=%Le\n", h);
-	better = 1;
-	h= pow(10,-3);
-	printf("h=1e-3 y0(h) eps=%Le\n", eps1(x, h));
-	printf("h=1e-3 y0(2h) eps=%Le\n", eps1(x, 2*h));
-	printf("h=1e-3 yr(h) eps=%Le\n", eps2(x, h));
-	printf("h=1e-3 ye(h) eps=%Le\n", eps3(x, h));
-	printf("h=1e-3 p=%Le\n", p(x, h));
+	yp0=fp(x0);
+	h0=6.8e-6;
+	h1=5e-4;
+	E0=eps1(x0,h0);//при оптимальному кроці
+	E1=eps1(x0,h1);//при менш точному кроці
+	E2=eps2(x0,h1);//уточнення за методом Рунге-Ромберта
+	E3=eps3(x0,h1);//уточнення за методом Ейткена
+	int pint = (int)roundl(p(x0,h1));//порядок точності
+	printf("yp0=%Lf\n",yp0);
+	printf("h0=%Le\n",h0);
+	printf("h1=%Le\n",h1);
+	printf("E0=%Le\n",E0);
+	printf("E1=%Le\n",E1);
+	printf("E2=%Le\n",E2);
+	printf("E3=%Le\n",E3);
+	printf("p=%i\n",pint);
+	fprintf(freport,"yp0=%Lf\n",yp0);
+	fprintf(freport,"h0=%Le\n",h0);
+	fprintf(freport,"h1=%Le\n",h1);
+	fprintf(freport,"E0=%Le //при оптимальному кроці\n",E0);
+	fprintf(freport,"E1=%Le //при менш точному кроці\n",E1);
+	fprintf(freport,"E2=%Le //уточнення за методом Рунге-Ромберта\n",E2);
+	fprintf(freport,"E3=%Le //уточнення за методом Ейткена\n",E3);
+	fprintf(freport,"p=%i //порядок точності\n",pint);
+	fclose(fdata);
+	fclose(freport);
 	return 0;
 }
 
