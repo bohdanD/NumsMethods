@@ -86,12 +86,12 @@ int main()
 
 	for (N=8000;N<1e+5;N+=1000)
 	{
-		fprintf(fdata,"%li\t%Le\n",N,fabsl(I(N)-int_ac));
+		//fprintf(fdata,"%li\t%Le\n",N,fabsl(I(N)-int_ac));
 	}
-	N=1000;
+	N=10;
 	while ((eps_t=fabs(I(N)-int_ac))>eps_opt)
 	{
-		//fprintf(fdata,"%i\t%Le\n",N,eps_e);
+		fprintf(fdata,"%li\t%Le\n",N,eps_t);
 		N+=1;
 	}
 	printf("Nopt=%li\n",N);
