@@ -28,7 +28,7 @@ int main()
 
 	int i=0, k=0, N = n+1, kmax=1e+5;
 	long double a[N],b[N],c[N];
-	a[0] = 2.0L; a[1] = -4.0L; a[2] = 1.0L; 
+	a[0] = 2.0L; a[1] = 4.0L; a[2] = -1.0L; 
 	
 	long double x0, x1 = 5, eps = 1e-12;
 	//метод Ньютона з використанням схеми Горнера
@@ -63,8 +63,8 @@ int main()
 		beta=beta1;
 		p=-2*alpha;
 		//q=power(alpha,2)+power(beta,2);
-		b[3]=a[3];
-		b[2]=a[2]-p*b[3];
+		b[n]=a[n];
+		b[n-1]=a[n-1]-p*b[n];
 		q1=a[0]/b[2];
 		p1=(a[1]*b[2]-a[0]*b[3])/(b[2]*b[2]);	
 		alpha1=-p1/2.0L;
@@ -78,6 +78,6 @@ int main()
 		}	while ((fabsl(alpha1-alpha)>=eps)&&(fabsl(beta1-beta)>=eps));
 		printf("Комплексний корінь: x1=%Lf-%Lfi. Знайдено за %d ітерацій\n",alpha1,beta1,k);
 		printf("Комплексний корінь: x2=%Lf+%Lfi. Знайдено за %d ітерацій\n",alpha1,beta1,k);
-
+	//fclose(fcoef);
 	return 0;
 }
