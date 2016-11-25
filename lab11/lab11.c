@@ -1,121 +1,83 @@
-
-
 #include <stdio.h>
 #include <math.h>
-const int m = 2;
-long double f1(long double x, long double y)
+
+long double fx(long double x)
 {
-	return x*x+y*y-16;
+	return 1.5L*(1-expl(-x*x));
 }
-long double f2(long double x, long double y)
+
+long double f(long double x,long double y)
 {
-	return y-x*x+2;
+	return 3*x-2*y*x;
 }
-long double df1dx(long double x)
-{
-	return 2*x;
-}
-long double df1dy(long double y)
-{
-	return 2*y;
-}
-long double df2dx(long double x)
-{
-	return -2*x;
-}
-long double df2dy(long double x)
-{
-	return 1;
-}
-void gauss(long double a[][m], long double *b, long double *x, int m){
-	int k, max, i, j;
-	long double prom, t, mmax;
-	for(k=0;k<m;k++){
-		max=k;
-		mmax=fabsl(a[k][k]);
-		for(i=k+1;i<m;i++)
-			if(fabsl(a[i][k])>mmax){
-				max=i;
-				mmax=fabsl(a[i][k]);
-			}
-			
-		if(max!=k){
-			for(i=0;i<m;i++){
-				prom=a[k][i];
-				a[k][i]=a[max][i];
-				a[max][i]=prom;
-			}
-			prom=b[k];
-			b[k]=b[max];
-			b[max]=prom;
-		}
-		
-		for(i=k+1;i<m;i++){
-			t=-a[i][k]/a[k][k];
-			for(j=k+1;j<m;j++) a[i][j]+=t*a[k][j];
-			b[i]+=t*b[k];
-		}	
-	}
-	
-	x[m-1]=b[m-1]/a[m-1][m-1];
-	for(k=m-2;k>=0;k--){
-		x[k]=b[k];
-		for(i=k+1;i<m;i++)x[k]-=x[i]*a[k][i];
-		x[k]/=a[k][k];
-	}
-}
+
 int main()
 {
-	long double x0=0.0,y0=0.0,x1,y1,x_appr=4.0, y_appr=4.0, tau = 0.1, eps = 1e-10;
-	int kmax=1000,k=0;
-	//метод релаксації
-	printf("Метод релаксації\n");
-	x1=x_appr;
-	y1=y_appr;
-	do
+	FILE *fdata = fopen("epsf.txt","w");
+	FILE *fepsr = fopen("epsr.txt","w");
+	FILE *fepsh = fopen("epsh.txt","w");
+	int i=0;
+	long double a=0,b=4,h=1e-4,k1=0,k2=0,k3=0,k4=0,eps=1e-6;
+	int n=(b-a)/h+1;
+	long double y[n+1],x[n+1],y2[2*n+2],x2[2*n+2],psi=0;
+	x[0]=a;y[0]=0.0L;
+	for (i=0;i<=n;i++)//обчислення з точністю h
 	{
-		x0=x1;
-		y0=y1;
-		x1= x0 - tau*f1(x0,y0);
-		y1= y0 - tau*f2(x0,y0);	
-		//printf("x1=%20.20Lf\n",x1);
-		//printf("y1=%Lf\n",y1);
-		if (k>kmax) 
-		{
-			printf("Перевищена кількість ітерації\n");
-			break;
-		}
-		else {k++;}
-	}	while ((fabsl(x1-x0)>=eps)||(fabsl(y1-y0)>=eps)||(fabsl(f1(x1,y1))>=eps)||(fabsl(f2(x1,y1))>=eps));
-	printf("x=%20.20Lf\n",x1);
-	printf("y=%Lf\n",y1);
-	printf("k=%i\n\n",k);
-	//метод Ньютона
-	printf("Метод Ньютона\n");
-	k=0;x1=x_appr;y1=y_appr;tau=-0.1;
-	long double A[m][m],B[m],X[m];
-	do
+		x[i]=a+i*h;
+		k1=f(x[i],y[i]);
+		k2=f(x[i]+h*0.5L,y[i]+h*k1*0.5L);
+		k3=f(x[i]+h*0.5L,y[i]+h*k2*0.5L);
+		k4=f(x[i]+h,y[i]+h*k3);
+		y[i+1]=y[i]+h*(k1+2*k2+2*k3+k4)/6.0L;
+	}
+	h=h/2.0L;
+	for (i=0;i<=2*n;i++)//обчислення з точністю h/2
 	{
-		x0=x1;
-		y0=y1;
-		A[0][0]=df1dx(x0);
-		A[0][1]=df1dy(y0);
-		A[1][0]=df2dx(x0);
-		A[1][1]=df2dy(y0);
-		B[0]=f1(x0,y0);
-		B[1]=f2(x0,y0);
-		gauss(A,B,X,m);
-		x1 = x0 + tau*X[0];
-		y1 = y0 + tau*X[1];
-		if (k>kmax) 
+		x2[i]=a+i*h;
+		k1=f(x2[i],y2[i]);
+		k2=f(x2[i]+h*0.5L,y2[i]+h*k1*0.5L);
+		k3=f(x2[i]+h*0.5L,y2[i]+h*k2*0.5L);
+		k4=f(x2[i]+h,y2[i]+h*k3);
+		y2[i+1]=y2[i]+h*(k1+2*k2+2*k3+k4)/6.0L;
+	}
+	for (i=0;i<=n;i++)//обчислення похибки за точним значенням
+	{
+		fprintf(fdata,"%Lf\t%Lf\t%Lf\t%Le\n",x[i],fx(x[i]),y[i],fabsl(fx(x[i])-y[i]));
+	}
+	for (i=0;i<=2*n;i++)//обчислення похибки за методом Рунге
+	{
+		if ((i%2)==0)
+		fprintf(fepsr,"%Lf\t%Lf\t%Lf\t%Lf\t%Le\n",x[i/2],x2[i],y[i/2],y2[i],15*fabsl(y[i/2]-y2[i])/16.0L);
+	}
+	long double t = 0,t1=0,yn=y[0],yn1=0;
+	h=1e-4;long double eps32 = eps/32.0L;
+	//int k=0,kmax=1e+5;
+	for (t=a;t<=b;t+=h)//обчислення з автоматичним вибором кроку h
+	{
+		k1=f(t,yn);
+		k2=f(t+h*0.5L,yn+h*k1*0.5L);
+		k3=f(t+h*0.5L,yn+h*k2*0.5L);
+		k4=f(t+h,yn+h*k3);
+		yn1=yn+h*(k1+2*k2+2*k3+k4)/6.0L;
+		yn=yn1;
+		t1=t+h;
+		psi=fabsl(fx(t1)-yn1);
+		if (psi>eps) 
 		{
-			printf("Перевищена кількість ітерації\n");
-			break;
+			h=h*0.5L; 
+			//printf("divided :: psi>eps %Le > %Le h= %Le\n\n",psi,eps,h);
+		} 
+		if (psi<=eps32)  
+		{
+			h=h*2.0L; 
+			//printf("multyplied :: psi<=eps/32 %Le > %Le h= %Le\n\n",psi,eps32,h);
 		}
-		else {k++;}
-	}	while (fabsl(X[0]) >= eps && fabsl(X[1]) >= eps);
-	printf("x=%20.20Lf\n",x1);
-	printf("y=%Lf\n",y1);
-	printf("k=%i\n\n",k);
+		fprintf(fepsh,"%Le\t%Le\t%Le\t%Le\n",t1,h,psi,eps);
+	}
+	//printf("%Le\n",eps32);
+	printf("Дані записано  в output.txt");
+	fclose(fdata);
+	fclose(fepsr);
+	fclose(fepsh);
 	return 0;
-} 
+}
