@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <math.h>
-const int n = 2;
+const int n = 3;
 long double power(long double x, int a)
 {
 	long double mult = 1;
@@ -28,7 +28,7 @@ int main()
 
 	int i=0, k=0, N = n+1, kmax=1e+5;
 	long double a[N],b[N],c[N];
-	a[0] = 2.0L; a[1] = 4.0L; a[2] = -1.0L; 
+	a[0] = 1.0L; a[1] = -2.0L; a[2] = 3.0L;  a[3] = 4.0L;
 	
 	long double x0, x1 = 5, eps = 1e-12;
 	//метод Ньютона з використанням схеми Горнера
